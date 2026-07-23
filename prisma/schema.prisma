@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ──────────────────────────────────────────
+//  Customer (auto-created on first booking)
+// ──────────────────────────────────────────
+model User {
+  id           Int           @id @default(autoincrement())
+  name         String
+  phone        String        @unique
+  email        String?
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  appointments Appointment[]
+
+  @@map("users")
+}
+
+// ──────────────────────────────────────────
+//  Service offered by the electrician
+// ──────────────────────────────────────────
+model Service {
+  id            Int           @id @default(autoincrement())
+  serviceName   String        @map("service_name")
+  description   String        @db.Text
+  /// Internal reference price — NEVER exposed on any public API route
+  priceInternal Decimal?      @map("price_internal") @db.Decimal(10, 2)
+  imageUrl      String?       @map("image_url")
+  isActive      Boolean       @default(true) @map("is_active")
+  sortOrder     Int           @default(0) @map("sort_order")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  appointments  Appointment[]
+
+  @@map("services")
+}
+
+// ──────────────────────────────────────────
+//  Appointment / Booking
+// ──────────────────────────────────────────
+model Appointment {
+  id          Int               @id @default(autoincrement())
+  customerId  Int               @map("customer_id")
+  serviceId   Int               @map("service_id")
+  date        DateTime          @db.Date
+  timeWindow  TimeWindow        @map("time_window")
+  address     String
+  notes       String?           @db.Text
+  status      AppointmentStatus @default(pending)
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+  customer    User              @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  service     Service           @relation(fields: [serviceId], references: [id])
+  review      Review?
+  complaint   Complaint?
+
+  @@index([status])
+  @@index([date])
+  @@map("appointments")
+}
+
+// ──────────────────────────────────────────
+//  Review (only for completed appointments)
+// ──────────────────────────────────────────
+model Review {
+  id            Int         @id @default(autoincrement())
+  appointmentId Int         @unique @map("appointment_id")
+  rating        Int         // 1–5
+  comment       String?     @db.Text
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}
+
+// ──────────────────────────────────────────
+//  Complaint
+// ──────────────────────────────────────────
+model Complaint {
+  id            Int             @id @default(autoincrement())
+  appointmentId Int             @unique @map("appointment_id")
+  description   String          @db.Text
+  status        ComplaintStatus @default(open)
+  adminResponse String?         @map("admin_response") @db.Text
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  appointment   Appointment     @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@map("complaints")
+}
+
+// ──────────────────────────────────────────
+//  Enums
+// ──────────────────────────────────────────
+enum AppointmentStatus {
+  pending
+  approved
+  cancelled
+  completed
+}
+
+enum ComplaintStatus {
+  open
+  resolved
+}
+
+enum TimeWindow {
+  morning    // 08:00 – 12:00
+  afternoon  // 12:00 – 16:00
+  evening    // 16:00 – 18:00
+}

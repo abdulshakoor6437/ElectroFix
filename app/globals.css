@@ -1,0 +1,177 @@
+/* Fonts are self-hosted via next/font/google in app/layout.tsx.
+   CSS variables --font-sans / --font-display / --font-mono are
+   injected by next/font at build time — no @import needed here. */
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   Design tokens — ElectroFix brand system (Flat & High Contrast)
+───────────────────────────────────────────────────────────── */
+@theme inline {
+  /* Brand colours */
+  --color-navy:        #0B1B2E;    /* primary bg / text */
+  --color-navy-light:  #16324F;    /* secondary dark surfaces */
+  
+  --color-amber:       #F5B400;    /* primary CTA & accents only */
+  --color-amber-soft:  #FFF3D6;    /* soft badge/hover background */
+  
+  --color-bg-page:     #F7F5EF;    /* light page background */
+  
+  /* Status colours */
+  --color-muted-green: #2F8F5B;    /* approved/resolved */
+  --color-muted-coral: #D8532E;    /* cancelled/complaint */
+
+  /* Typography */
+  --font-sans:    "Inter", system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono:    "JetBrains Mono", monospace;
+
+  /* Shadows (removed except focus ring) */
+  --shadow-card:  none;
+  --shadow-glow:  0 0 0 2px #F5B400;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Base reset & global styles
+───────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --background: #F7F5EF;
+  --foreground: #0B1B2E;
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Typography utilities
+───────────────────────────────────────────────────────────── */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+  color: #0B1B2E;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Focus ring — accessible, brand-coloured
+───────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid #F5B400;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Scrollbar (subtle, brand-aware)
+───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F7F5EF;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0B1B2E;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Animations
+───────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+  50%       { box-shadow: 0 0 0 12px rgba(255, 215, 0, 0); }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.5s ease forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Common layout utilities
+───────────────────────────────────────────────────────────── */
+.container-wide {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.section {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Glass card
+───────────────────────────────────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+}

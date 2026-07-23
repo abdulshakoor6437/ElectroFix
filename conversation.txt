@@ -1,0 +1,137 @@
+================================================================================
+                     ELECTROFIX - CONVERSATION & WORK LOG
+================================================================================
+Project: ElectroFix — Electrician Booking & Reviews Website
+Location: Rawalpindi & Surrounding Areas
+Electrician: Shakoor
+WhatsApp Contact: +923175198445
+Admin Email: khanshakoor6437@gmail.com
+Admin Password: Shakoor#1413
+Database: XAMPP MySQL (mysql://root:@localhost:3306/electrofix)
+Date/Time: 2026-07-20
+
+--------------------------------------------------------------------------------
+1. USER REQUIREMENTS & CONFIRMED DECISIONS
+--------------------------------------------------------------------------------
+- Business Name: ElectroFix
+- Electrician Bio: Shakoor (Independent Electrician based in Rawalpindi)
+- Time Window Model: Morning (8–12), Afternoon (12–4), Evening (4–6)
+- Customer Email Option: **COMPLETELY REMOVED** per explicit user request.
+  Guests book appointments using Name, Phone Number, Rawalpindi Address, and Notes.
+- WhatsApp Integration: Floating button linking to wa.me/923175198445 across all pages.
+- Admin Route: Protected `/admin/*` pages with `noindex, nofollow` meta tag for SEO safety.
+- Price Leak Guard: `/api/services` never includes `priceInternal` (strictly omitted).
+
+--------------------------------------------------------------------------------
+2. FULL SUMMARY OF FILES CREATED & MODIFIED
+--------------------------------------------------------------------------------
+
+[Environment & Configuration]
+- `.env.local` & `.env`
+  Contains DATABASE_URL, AUTH_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD, and business constants.
+- `lib/constants.ts`
+  Stores default fallbacks for Shakoor, Rawalpindi, WhatsApp number (+923175198445), and Time Windows.
+- `lib/auth.ts`
+  Auth.js v5 credentials configuration for single admin authentication.
+- `middleware.ts`
+  Protects `/admin/*` routes from unauthorized access and adds X-Robots-Tag: noindex.
+
+[Database & Prisma]
+- `prisma/schema.prisma`
+  Models: User (name, phone), Service (serviceName, description, priceInternal, isActive),
+  Appointment (customerId, serviceId, date, timeWindow, address, notes, status),
+  Review (appointmentId, rating, comment), Complaint (appointmentId, description, status, adminResponse).
+- `prisma/seed.ts`
+  Seeds initial electrical services for Rawalpindi (Wiring, DB Board Repair, Ceiling Fans & Lights,
+  Inverter & Solar Backup Wiring, AC Points, Full Rewiring).
+
+[Public Layout & Components]
+- `components/layout/Navbar.tsx`
+  Header navigation bar with logo, links, and "Book Now" CTA.
+- `components/layout/Footer.tsx`
+  Footer with service area info, phone, WhatsApp CTA (email references removed).
+- `components/layout/WhatsAppButton.tsx`
+  Floating WhatsApp button bottom-right with bounce animation linking to wa.me/923175198445.
+
+[Public Pages & Booking Wizard]
+- `app/book/page.tsx`
+  4-Step Guest Booking Wizard:
+    Step 1: Select Service (Cards)
+    Step 2: Select Date & Time Window (Morning/Afternoon/Evening)
+    Step 3: Contact Details (Name, Phone Number, Address, Notes — NO EMAIL FIELD)
+    Step 4: Review & Submit Booking -> POST /api/bookings -> Confirmation screen with Reference ID.
+- `app/reviews/page.tsx`
+  Public rating dashboard displaying star ratings, customer first names, average calculation,
+  and a "Leave a Review" modal verified by appointment reference ID and phone number.
+- `app/complaint/page.tsx`
+  Portal for filing service complaints tied to appointment IDs.
+- `app/contact/page.tsx`
+  Contact page displaying direct phone, WhatsApp link, Rawalpindi area details, and contact form.
+- `app/services/page.tsx`, `app/about/page.tsx`, `app/page.tsx`
+  Public showcase pages aligned to Shakoor's services in Rawalpindi.
+
+[Public API Routes]
+- `app/api/bookings/route.ts` (POST)
+  Validates guest booking via Zod, upserts customer by phone number, creates appointment with status `pending`.
+- `app/api/services/route.ts` (GET)
+  Returns active service catalog with `priceInternal` strictly omitted.
+- `app/api/reviews/route.ts` (GET & POST)
+  GET returns public reviews and calculated average; POST submits review for completed appointments.
+- `app/api/complaints/route.ts` (POST)
+  Submits complaint for active/past appointments.
+
+[Admin Dashboard & APIs (`/admin/*`)]
+- `app/admin/layout.tsx`
+  Admin navigation bar (Dashboard, Appointments, Customers, Services, Reviews & Complaints, Sign Out).
+- `app/admin/login/page.tsx`
+  Credentials login page pre-filled with admin email placeholder (`khanshakoor6437@gmail.com`).
+- `app/admin/dashboard/page.tsx`
+  Analytics overview (Pending Requests, Approved Jobs, Completed Jobs, Total Clients).
+- `app/admin/appointments/page.tsx`
+  Filterable appointments table with status actions (Approve, Complete, Cancel).
+- `app/admin/customers/page.tsx`
+  Customer directory listing phone numbers and total booking counts.
+- `app/admin/services/page.tsx`
+  CRUD manager for electrical services including internal estimated prices.
+- `app/admin/reviews/page.tsx`
+  Tabbed manager for customer review feed and complaint resolution modal.
+- `app/api/admin/appointments/route.ts` (GET, PATCH)
+- `app/api/admin/customers/route.ts` (GET)
+- `app/api/admin/services/route.ts` (GET, POST, PUT)
+- `app/api/admin/reviews/route.ts` (GET)
+- `app/api/admin/complaints/route.ts` (GET, PATCH)
+
+--------------------------------------------------------------------------------
+3. BUILD & VERIFICATION RESULTS
+--------------------------------------------------------------------------------
+- Next.js Turbopack Production Build (`npm run build`):
+  Result: SUCCESS (0 errors).
+  Prerendered 25 static & dynamic routes:
+    / (Home)
+    /about
+    /book
+    /services
+    /reviews
+    /complaint
+    /contact
+    /admin/login
+    /admin/dashboard
+    /admin/appointments
+    /admin/customers
+    /admin/services
+    /admin/reviews
+    All public & admin API endpoints
+
+--------------------------------------------------------------------------------
+4. HOW TO RUN LOCALLY
+--------------------------------------------------------------------------------
+1. Ensure XAMPP MySQL is running on localhost:3306 with database "electrofix".
+2. Run database setup & seeding:
+     npx prisma db push
+     npx prisma db seed
+3. Start the Next.js development server:
+     npm run dev
+4. Open http://localhost:3000 for public website.
+5. Open http://localhost:3000/admin/login for admin dashboard.
+
+================================================================================
